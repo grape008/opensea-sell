@@ -51,7 +51,10 @@ async function prompt(question) {
         orderPrice = await prompt(chalk.green("Цена: "));
     } while (orderPrice.match("\d+"))
 
-    const browser = await dappeteer.launch(puppeteer, {metamaskVersion: 'v10.1.1'});
+    const browser = await dappeteer.launch(puppeteer, {
+        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+        metamaskVersion: 'v10.1.1'
+    });
     const metamask = await dappeteer.setupMetamask(browser, {seed: secretPhase});
 
     if (network === '2') {
