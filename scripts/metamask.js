@@ -35,12 +35,13 @@ async function connectWallet(page, metamask) {
     const connectWalletButton = await page.$x("//button[contains(text(), 'Connect wallet')]");
     await connectWalletButton[0].click();
 
-    await page.waitForXPath('//span[(text()="MetaMask")]');
-    const metaMaskWalletButton = await page.$x("//span[contains(text(), 'MetaMask')]");
-    await metaMaskWalletButton[0].click();
+    await page.waitForXPath('//span[(text()="MetaMask")]').then(async () =>{
+        const metaMaskWalletButton = await page.$x("//span[contains(text(), 'MetaMask')]");
+        await metaMaskWalletButton[0].click();
 
-    await metamask.approve();
-
+        await metamask.approve();
+    })
+    
     await page.waitForTimeout(3000);
 }
 
