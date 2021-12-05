@@ -10,7 +10,6 @@ const {readCsvFile} = require('./csv');
 const uploadImage = async (page, file) => {
     const elementHandle = await page.$("#media");
     await elementHandle.uploadFile(file);
-
 }
 
 async function mintNft(page, nft, network) {
@@ -20,7 +19,10 @@ async function mintNft(page, nft, network) {
     await page.keyboard.type(nft.Name);
 
     await page.focus('#description');
-    await page.keyboard.type(nft.Description);
+    let description = nft.Description;
+    description = description.replace(new RegExp('\n', 'g'), '\n\n');
+
+    await page.keyboard.type(description);
 
     if (["3", "4"].includes(network)) {
         await page.click("input[id='chain']");
@@ -58,11 +60,29 @@ async function mintNft(page, nft, network) {
         }
 
         const saveButton = await page.$x("//button[contains(text(), 'Save')]");
-        await saveButton[0].click()
+        await saveButton[0].click();
     }
 
     const createButton = await page.$x("//button[contains(text(), 'Create')]");
     await createButton[0].click();
+}
+
+async function sellNft(page, metamask, price) {
+    const sellButton = await page.$x("//a[contains(text(), 'Sell')]");
+    await sellButton[0].click();
+
+    await page.waitForSelector('input[name="price"]').then(async () => {
+        await page.focus('input[name="price"]');
+        await page.keyboard.type(price);
+
+        await page.click('button[type="submit"]');
+    });
+
+    await page.waitForXPath('//p[text()="Waiting for signature..."]').then(async () => {
+        await metamask.sign();
+    });
+
+    await page.waitForXPath('//a[text()="View Item"]');
 }
 
 (async () => {
@@ -114,6 +134,19 @@ async function mintNft(page, nft, network) {
             console.log(nft);
             console.log();
         });
+
+        if (nft.Price !== '') {
+            await tabs[1].bringToFront()
+
+            let orderPrice = nft.Price.replace(',', '.');
+
+            await page.click('i[aria-label="Close"]');
+
+            await page.waitForXPath("//a[contains(text(), 'Sell')]").then(async () => {
+                await sellNft(page, metamask, orderPrice);
+            });
+
+        }
 
     }
 
