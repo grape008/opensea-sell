@@ -1,41 +1,18 @@
-const chalk = require("chalk");
-const colorize = require('json-colorizer');
+const chalk = require('chalk');
 const dappeteer = require('@chainsafe/dappeteer')
-const readline = require('readline');
 const puppeteer = require('puppeteer');
 
-let openSeaUrl = 'https://opensea.io/';
+const {prompt, closeReadLine} = require('./io')
+const {chooseNetwork, getOpenSeaUrl} = require('./networks')
+const {setupMetamask, connectWallet} = require('./metamask');
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-async function prompt(question) {
-    return await new Promise(resolve => {
-        rl.question(question, resolve)
-    });
-}
 
 (async () => {
-    console.log(colorize({
-        "1": "Mainnet",
-        "2": "Rinkeby"
-    }, {
-        colors: {STRING_KEY: 'red'},
-        pretty: true
-    }));
+    const network = await chooseNetwork();
+    const openSeaUrl = await getOpenSeaUrl(network);
+    const secretPhase = await prompt(chalk.red('MetaMask Secret Phrase: '));
 
     console.log();
-
-    let network = '';
-    do {
-        network = await prompt(chalk.red('Cеть: '));
-    } while (!network.match(/^(1|2)$/));
-
-
-    console.log();
-    const secretPhase = await prompt(chalk.red(`MetaMask Secret Phrase: `));
     const nftUrl = await prompt(chalk.red(`NFT Url: `));
     console.log();
 
@@ -55,12 +32,8 @@ async function prompt(question) {
         executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
         metamaskVersion: 'v10.1.1'
     });
-    const metamask = await dappeteer.setupMetamask(browser, {seed: secretPhase});
 
-    if (network === '2') {
-        await metamask.switchNetwork('rinkeby');
-        openSeaUrl = 'https://testnets.opensea.io/';
-    }
+    const metamask = await setupMetamask(browser, secretPhase, network);
 
     const page = await browser.newPage();
     await page.goto(openSeaUrl);
@@ -68,20 +41,7 @@ async function prompt(question) {
     const firstTabs = await browser.pages();
     await firstTabs[0].close();
 
-    await page.waitForSelector("i[title='Open menu']");
-    await page.click("i[title='Open menu']");
-
-    await page.waitForXPath('//button[(text()="Connect wallet")]');
-    const connectWalletButton = await page.$x("//button[contains(text(), 'Connect wallet')]");
-    await connectWalletButton[0].click();
-
-    await page.waitForXPath('//span[(text()="MetaMask")]');
-    const metaMaskWalletButton = await page.$x("//span[contains(text(), 'MetaMask')]");
-    await metaMaskWalletButton[0].click();
-
-    await metamask.approve();
-
-    await page.waitForTimeout(3000);
+    await connectWallet(page, metamask);
 
     let completedOrders = 0;
     let uncompletedOrders = 0;
@@ -113,6 +73,6 @@ async function prompt(question) {
     console.log(chalk.green(`Всего размещено ${completedOrders} ордеров`));
     console.log(chalk.red(`Не удалось разместить ${uncompletedOrders} ордеров`));
 
-    rl.close()
+    await closeReadLine();
     await browser.close();
 })();
