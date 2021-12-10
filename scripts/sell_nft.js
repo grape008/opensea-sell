@@ -49,7 +49,6 @@ async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
         orderPrice = await prompt(chalk.green("Цена: "));
     } while (orderPrice.match("\d+"))
 
-
     const browser = await dappeteer.launch(puppeteer, {
         executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
         metamaskVersion: 'v10.1.1'
