@@ -7,13 +7,14 @@ const {chooseNetwork, getOpenSeaUrl} = require('./networks')
 const {setupMetamask, connectWallet} = require('./metamask');
 const {retry} = require('./retry');
 
-async function sellNft(page, metamask, orderPrice) {
+
+async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
+    const tabs = await browser.pages();
+
+    await tabs[1].bringToFront()
+    await tabs[1].goto(nftUrl + '/sell')
+
     await page.waitForSelector('input[name="price"]').then(async () => {
-        await page.evaluate(() => {
-            const inputPrice = document.querySelector('input[name="price"]');
-            inputPrice.value = '';
-        });
-        
         await page.focus('input[name="price"]');
         await page.keyboard.type(orderPrice);
 
@@ -48,6 +49,7 @@ async function sellNft(page, metamask, orderPrice) {
         orderPrice = await prompt(chalk.green("Цена: "));
     } while (orderPrice.match("\d+"))
 
+
     const browser = await dappeteer.launch(puppeteer, {
         executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
         metamaskVersion: 'v10.1.1'
@@ -67,12 +69,7 @@ async function sellNft(page, metamask, orderPrice) {
     let uncompletedOrders = 0;
 
     for (let i = 0; i < numberOfOrders; i++) {
-        const tabs = await browser.pages();
-
-        await tabs[1].bringToFront()
-        await tabs[1].goto(nftUrl + '/sell')
-
-        await retry(sellNft, [page, metamask, orderPrice]).then(() => {
+        await retry(sellNft, [browser, page, metamask, nftUrl, orderPrice]).then(() => {
             console.log(`Ордер ${i} размещен`);
             completedOrders++;
         }).catch(() => {

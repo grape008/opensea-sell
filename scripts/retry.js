@@ -9,6 +9,7 @@ async function retry(
     try {
         return await fn(...args);
     } catch (error) {
+        console.log("Ошибка вызова. Повтор.");
         await wait(interval);
         if (retriesLeft === 0) {
             throw new Error(error);
