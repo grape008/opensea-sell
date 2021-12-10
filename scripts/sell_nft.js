@@ -59,12 +59,14 @@ async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
         attempt++;
 
         const browser = await dappeteer.launch(puppeteer, {
-            executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome', metamaskVersion: 'v10.1.1'
+            executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+            metamaskVersion: 'v10.1.1'
         });
 
         const metamask = await setupMetamask(browser, secretPhase, network);
 
         const page = await browser.newPage();
+        await page.setDefaultNavigationTimeout(0);
         await page.goto(openSeaUrl);
 
         const firstTabs = await browser.pages();
