@@ -9,6 +9,11 @@ const {retry} = require('./retry');
 
 async function sellNft(page, metamask, orderPrice) {
     await page.waitForSelector('input[name="price"]').then(async () => {
+        await page.evaluate(() => {
+            const inputPrice = document.querySelector('input[name="price"]');
+            inputPrice.value = '';
+        });
+        
         await page.focus('input[name="price"]');
         await page.keyboard.type(orderPrice);
 

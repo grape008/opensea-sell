@@ -4,7 +4,7 @@ async function retry(
     fn,
     args,
     retriesLeft = 3,
-    interval = 500,
+    interval = 1000,
 ) {
     try {
         return await fn(...args);
