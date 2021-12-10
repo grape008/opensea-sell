@@ -5,7 +5,22 @@ const puppeteer = require('puppeteer');
 const {prompt, closeReadLine} = require('./io')
 const {chooseNetwork, getOpenSeaUrl} = require('./networks')
 const {setupMetamask, connectWallet} = require('./metamask');
+const {retry} = require('./retry');
 
+async function sellNft(page, metamask, orderPrice) {
+    await page.waitForSelector('input[name="price"]').then(async () => {
+        await page.focus('input[name="price"]');
+        await page.keyboard.type(orderPrice);
+
+        await page.click('button[type="submit"]');
+    });
+
+    await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
+        metamask.sign();
+    });
+
+    await page.waitForXPath('//a[text()="View Item"]');
+}
 
 (async () => {
     const network = await chooseNetwork();
@@ -52,24 +67,14 @@ const {setupMetamask, connectWallet} = require('./metamask');
         await tabs[1].bringToFront()
         await tabs[1].goto(nftUrl + '/sell')
 
-        await page.waitForSelector('input[name="price"]').then(async () => {
-            await page.focus('input[name="price"]');
-            await page.keyboard.type(orderPrice);
-
-            await page.click('button[type="submit"]');
-        });
-
-        await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
-            metamask.sign();
-        });
-
-        await page.waitForXPath('//a[text()="View Item"]').then(() => {
+        await retry(sellNft, [page, metamask, orderPrice]).then(() => {
             console.log(`Ордер ${i} размещен`);
             completedOrders++;
         }).catch(() => {
             console.log(chalk.red(`Ошибка размещения ордера ${i}`));
             uncompletedOrders++;
         });
+
     }
 
     console.log();
