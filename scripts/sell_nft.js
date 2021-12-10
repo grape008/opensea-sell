@@ -5,7 +5,6 @@ const puppeteer = require('puppeteer');
 const {prompt, closeReadLine} = require('./io')
 const {chooseNetwork, getOpenSeaUrl} = require('./networks')
 const {setupMetamask, connectWallet} = require('./metamask');
-const {retry} = require('./retry');
 
 
 async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
@@ -49,39 +48,49 @@ async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
         orderPrice = await prompt(chalk.green("Цена: "));
     } while (orderPrice.match("\d+"))
 
-    const browser = await dappeteer.launch(puppeteer, {
-        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
-        metamaskVersion: 'v10.1.1'
-    });
-
-    const metamask = await setupMetamask(browser, secretPhase, network);
-
-    const page = await browser.newPage();
-    await page.goto(openSeaUrl);
-
-    const firstTabs = await browser.pages();
-    await firstTabs[0].close();
-
-    await connectWallet(page, metamask);
+    await closeReadLine();
 
     let completedOrders = 0;
-    let uncompletedOrders = 0;
+    let attempt = 1;
 
-    for (let i = 0; i < numberOfOrders; i++) {
-        await retry(sellNft, [browser, page, metamask, nftUrl, orderPrice]).then(() => {
-            console.log(`Ордер ${i} размещен`);
-            completedOrders++;
-        }).catch(() => {
-            console.log(chalk.red(`Ошибка размещения ордера ${i}`));
-            uncompletedOrders++;
+    while (numberOfOrders !== completedOrders) {
+        console.log();
+        console.log(chalk.red(`Попытка ${attempt}`));
+        attempt++;
+
+        const browser = await dappeteer.launch(puppeteer, {
+            executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome', metamaskVersion: 'v10.1.1'
         });
 
+        const metamask = await setupMetamask(browser, secretPhase, network);
+
+        const page = await browser.newPage();
+        await page.goto(openSeaUrl);
+
+        const firstTabs = await browser.pages();
+        await firstTabs[0].close();
+
+        await connectWallet(page, metamask);
+
+        let errors = 0;
+        while (errors < 5) {
+            if (completedOrders === numberOfOrders) {
+                break;
+            }
+
+            await sellNft(browser, page, metamask, nftUrl, orderPrice).then(() => {
+                console.log(`Ордер размещен ${completedOrders}`);
+                completedOrders++;
+                errors = 0;
+            }).catch((error) => {
+                errors++;
+                console.log(chalk.red(`Ошибка размещения ордера ${error}`));
+            });
+        }
+
+        await browser.close();
     }
 
     console.log();
     console.log(chalk.green(`Всего размещено ${completedOrders} ордеров`));
-    console.log(chalk.red(`Не удалось разместить ${uncompletedOrders} ордеров`));
-
-    await closeReadLine();
-    await browser.close();
 })();
