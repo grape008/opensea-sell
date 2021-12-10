@@ -52,9 +52,12 @@ const {setupMetamask, connectWallet} = require('./metamask');
         await tabs[1].bringToFront()
         await tabs[1].goto(nftUrl + '/sell')
 
-        await page.focus('input[name="price"]')
-        await page.keyboard.type(orderPrice)
-        await page.click('button[type="submit"]');
+        await page.waitForSelector('input[name="price"]').then(async () => {
+            await page.focus('input[name="price"]');
+            await page.keyboard.type(orderPrice);
+
+            await page.click('button[type="submit"]');
+        });
 
         await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
             metamask.sign();
