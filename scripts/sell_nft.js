@@ -75,7 +75,7 @@ async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
         await connectWallet(page, metamask);
 
         let errors = 0;
-        while (errors < 5) {
+        while (errors < 2) {
             if (completedOrders === numberOfOrders) {
                 break;
             }
