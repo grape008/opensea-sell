@@ -100,6 +100,7 @@ async function sellNft(page, metamask, price) {
     const metamask = await setupMetamask(browser, secretPhase, network);
 
     const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(0);
     await page.goto(openSeaUrl);
 
     const firstTabs = await browser.pages();
