@@ -145,7 +145,9 @@ async function sellNft(page, metamask, price) {
             await page.click('i[aria-label="Close"]');
 
             await page.waitForXPath("//a[contains(text(), 'Sell')]").then(async () => {
-                await sellNft(page, metamask, orderPrice);
+                await sellNft(page, metamask, orderPrice).catch((error) => {
+                    console.log(chalk.red(`Ошибка размещения ордера ${nft.Name}: ${error}`));
+                });
             });
 
         }
