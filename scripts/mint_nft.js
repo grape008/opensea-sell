@@ -58,8 +58,8 @@ const resultDir = './result';
 
             // mint nft
             for (const nft of nfts) {
-                if (!fs.existsSync(`./assets/${nft.Name}.jpg`)) {
-                    console.log(chalk.red(`Файл не найден: ${nft.Name}.jpg`));
+                if (!fs.existsSync(`./assets/${nft.Name}.jpg`) && !fs.existsSync(`./assets/${nft.Name}.png`)) {
+                    console.log(chalk.red(`Файл не найден: ${nft.Name}`));
 
                     continue;
                 }

@@ -1,4 +1,6 @@
 const chalk = require("chalk");
+const fs = require('fs');
+
 
 async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
     const tabs = await browser.pages();
@@ -27,7 +29,11 @@ const uploadImage = async (page, file) => {
 }
 
 async function mintNft(page, metamask, nft, network) {
-    await uploadImage(page, `./assets/${nft.Name}.jpg`);
+    if (fs.existsSync(`./assets/${nft.Name}.jpg`)) {
+        await uploadImage(page, `./assets/${nft.Name}.jpg`);
+    } else {
+        await uploadImage(page, `./assets/${nft.Name}.png`);
+    }
 
     await page.focus('#name');
     await page.keyboard.type(nft.Name);
