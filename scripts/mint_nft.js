@@ -36,12 +36,12 @@ const resultDir = './result';
     console.log(chalk.blue('minting...'));
 
     const nfts = await csv.readCsvFile('./result/unminted.csv');
-
     if (nfts.length > 0) {
         await dappeteer.launch(puppeteer, {
             executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
             metamaskVersion: 'v10.1.1',
-            headless: false
+            headless: false,
+            timeout: 90000
         }).then(async (browser) => {
             const metamask = await setupMetamask(browser, secretPhase, network);
 
