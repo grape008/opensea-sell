@@ -5,27 +5,7 @@ const puppeteer = require('puppeteer');
 const {prompt, closeReadLine} = require('./io')
 const {chooseNetwork, getOpenSeaUrl} = require('./networks')
 const {setupMetamask, connectWallet} = require('./metamask');
-
-
-async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
-    const tabs = await browser.pages();
-
-    await tabs[1].bringToFront()
-    await tabs[1].goto(nftUrl + '/sell')
-
-    await page.waitForSelector('input[name="price"]').then(async () => {
-        await page.focus('input[name="price"]');
-        await page.keyboard.type(orderPrice);
-
-        await page.click('button[type="submit"]');
-    });
-
-    await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
-        metamask.sign();
-    });
-
-    await page.waitForXPath('//a[text()="View Item"]');
-}
+const {sellNft} = require('./opensea');
 
 (async () => {
     const network = await chooseNetwork();

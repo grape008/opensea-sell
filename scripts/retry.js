@@ -10,13 +10,14 @@ async function retry(
         return await fn(...args);
     } catch (error) {
         console.log("Ошибка вызова. Повтор.");
-        
+
         const timeout = (3 - retriesLeft + 1) * interval;
         await wait(timeout);
 
         if (retriesLeft === 0) {
             throw new Error(error);
         }
+
         return retry(fn, args, --retriesLeft, interval);
     }
 }
