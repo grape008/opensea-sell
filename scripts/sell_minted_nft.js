@@ -16,7 +16,6 @@ async function sellMintedNft(secretPhase, network) {
         fs.copyFileSync('./result/minted.csv', './result/unsold.csv')
     }
 
-
     const unsoldNft = await csv.readNftFromCsvFile('result/unsold.csv');
 
     if (unsoldNft.length > 0) {
