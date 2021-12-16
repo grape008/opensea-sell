@@ -60,7 +60,7 @@ const {sellNft} = require('./opensea');
                 break;
             }
 
-            await sellNft(browser, page, metamask, nftUrl, orderPrice).then(() => {
+            await sellNft(browser, page, metamask, network, nftUrl, orderPrice).then(() => {
                 console.log(`Ордер размещен ${completedOrders}`);
                 completedOrders++;
                 errors = 0;

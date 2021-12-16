@@ -2,7 +2,7 @@ const chalk = require("chalk");
 const fs = require('fs');
 
 
-async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
+async function sellNft(browser, page, metamask, network, nftUrl, orderPrice) {
     const tabs = await browser.pages();
 
     await tabs[1].bringToFront()
@@ -15,11 +15,25 @@ async function sellNft(browser, page, metamask, nftUrl, orderPrice) {
         await page.click('button[type="submit"]');
     });
 
-    await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
-        metamask.sign();
-    });
+    if (["1", "2"].includes(network)) {
+        await page.waitForXPath('//p[text()="Waiting for signature..."]').then(() => {
+            metamask.sign();
+        });
 
-    await page.waitForXPath('//a[text()="View Item"]');
+        await page.waitForXPath('//a[text()="View Item"]');
+    } else {
+        await page.waitForXPath('//button[text()="Sign"]').then(async () => {
+            const signButton = await page.$x('//button[text()="Sign"]');
+            await signButton[0].click();
+        });
+
+        await page.waitForSelector('.ActionProgress--svg').then(() => {
+            metamask.sign();
+        });
+
+        await page.waitForXPath('//h4[text()="Your NFT is listed!"]');
+    }
+
 }
 
 

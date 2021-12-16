@@ -35,10 +35,9 @@ async function sellMintedNft(secretPhase, network) {
 
             await connectWallet(page, metamask);
 
-
             for (const nft of unsoldNft) {
                 if (nft.Price !== '') {
-                    await sellNft(browser, page, metamask, nft.AssetUrl, nft.Price).then(() => {
+                    await sellNft(browser, page, metamask, network, nft.AssetUrl, nft.Price).then(() => {
                         csv.writeSoldNftToCsvFile(nft);
 
                         console.log(chalk.green(`Ордер размещен ${nft.Name}`));
