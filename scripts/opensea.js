@@ -27,8 +27,8 @@ async function sellNft(browser, page, metamask, network, nftUrl, orderPrice) {
             await signButton[0].click();
         });
 
-        await page.waitForSelector('.ActionProgress--svg').then(() => {
-            metamask.sign();
+        await page.waitForSelector('.ActionProgress--svg').then(async () => {
+            await metamask.sign();
         });
 
         await page.waitForXPath('//h4[text()="Your NFT is listed!"]');
@@ -100,8 +100,8 @@ async function mintNft(page, metamask, nft, network) {
     const createButton = await page.$x("//button[contains(text(), 'Create')]");
     await createButton[0].click();
 
-    await page.waitForXPath('//h4[text()="Waiting for your wallet signature..."]').then(() => {
-        metamask.sign();
+    await page.waitForXPath('//h4[text()="Waiting for your wallet signature..."]').then(async () => {
+        await metamask.sign();
     });
 
     await page.waitForXPath(`//h4[text()="You created ${nft.Name}!"]`).then(() => {

@@ -42,7 +42,7 @@ async function connectWallet(page, metamask) {
         await metamask.approve();
     })
 
-    await page.waitForTimeout(1000);
+    await page.waitForXPath('//p[(text()="Total balance")]');
 }
 
 module.exports = {
