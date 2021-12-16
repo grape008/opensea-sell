@@ -20,16 +20,7 @@ const resultDir = './result';
     const secretPhase = await prompt(chalk.red('MetaMask Secret Phrase: '));
     const collectionSlug = await prompt(chalk.green('Collection Slug: '));
 
-    let clearResult = '';
-    do {
-        clearResult = await prompt(chalk.red('Очистить директорию result (y/n)?: '));
-    } while (!clearResult.match(/^(y|n)$/));
-
     await closeReadLine();
-
-    if (clearResult === 'y' && fs.existsSync(resultDir)) {
-        fs.rmdirSync(resultDir, {recursive: true});
-    }
 
     // create result directory
     if (!fs.existsSync(resultDir)) {
@@ -44,48 +35,52 @@ const resultDir = './result';
     console.log();
     console.log(chalk.blue('minting...'));
 
-    await dappeteer.launch(puppeteer, {
-        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
-        metamaskVersion: 'v10.1.1',
-        headless: false
-    }).then(async (browser) => {
-        const metamask = await setupMetamask(browser, secretPhase, network);
+    const nfts = await csv.readCsvFile('./result/unminted.csv');
 
-        const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(0);
-        await page.goto(openSeaUrl);
+    if (nfts.length > 0) {
+        await dappeteer.launch(puppeteer, {
+            executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+            metamaskVersion: 'v10.1.1',
+            headless: false
+        }).then(async (browser) => {
+            const metamask = await setupMetamask(browser, secretPhase, network);
 
-        const firstTabs = await browser.pages();
-        await firstTabs[0].close();
+            const page = await browser.newPage();
+            await page.setDefaultNavigationTimeout(0);
+            await page.goto(openSeaUrl);
 
-        await connectWallet(page, metamask);
+            const firstTabs = await browser.pages();
+            await firstTabs[0].close();
 
-        const tabs = await browser.pages();
+            await connectWallet(page, metamask);
 
-        const nfts = await csv.readCsvFile('./result/unminted.csv');
+            const tabs = await browser.pages();
 
-        // mint nft
-        for (const nft of nfts) {
-            if (!fs.existsSync(`./assets/${nft.Name}.jpg`)) {
-                console.log(chalk.red(`Файл не найден: ${nft.Name}.jpg`));
+            // mint nft
+            for (const nft of nfts) {
+                if (!fs.existsSync(`./assets/${nft.Name}.jpg`)) {
+                    console.log(chalk.red(`Файл не найден: ${nft.Name}.jpg`));
 
-                continue;
+                    continue;
+                }
+
+                await tabs[1].bringToFront()
+                await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create?enable_supply=true`);
+
+                await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
+                    await csv.writeMintedNftToCsvFile(mintedNft);
+                }).catch((error) => {
+                    console.log(chalk.red(`Ошибка minting'а ${nft.Name}: ${error}`));
+                });
             }
 
-            await tabs[1].bringToFront()
-            await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create?enable_supply=true`);
-
-            await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
-                await csv.writeMintedNftToCsvFile(mintedNft);
-            }).catch((error) => {
-                console.log(chalk.red(`Ошибка minting'а ${nft.Name}: ${error}`));
-            });
-        }
-
-        await browser.close();
-    }).catch((error) => {
-        console.log(chalk.red(`Ошибка запуска browser: ${error}`));
-    });
+            await browser.close();
+        }).catch((error) => {
+            console.log(chalk.red(`Ошибка запуска browser: ${error}`));
+        });
+    } else {
+        console.log(chalk.green(`Нет nft для minting'а...`));
+    }
 
     console.log();
     console.log(chalk.blue('продажа...'));

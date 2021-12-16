@@ -16,40 +16,46 @@ async function sellMintedNft(secretPhase, network) {
         fs.copyFileSync('./result/minted.csv', './result/unsold.csv')
     }
 
-    await dappeteer.launch(puppeteer, {
-        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
-        metamaskVersion: 'v10.1.1',
-        headless: false
-    }).then(async (browser) => {
-        const metamask = await setupMetamask(browser, secretPhase, network);
 
-        const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(0);
-        await page.goto(openSeaUrl);
+    const unsoldNft = await csv.readNftFromCsvFile('result/unsold.csv');
 
-        const firstTabs = await browser.pages();
-        await firstTabs[0].close();
+    if (unsoldNft.length > 0) {
+        await dappeteer.launch(puppeteer, {
+            executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+            metamaskVersion: 'v10.1.1',
+            headless: false
+        }).then(async (browser) => {
+            const metamask = await setupMetamask(browser, secretPhase, network);
 
-        await connectWallet(page, metamask);
+            const page = await browser.newPage();
+            await page.setDefaultNavigationTimeout(0);
+            await page.goto(openSeaUrl);
 
-        const mintedNft = await csv.readNftFromCsvFile('result/unsold.csv');
+            const firstTabs = await browser.pages();
+            await firstTabs[0].close();
 
-        for (const nft of mintedNft) {
-            if (nft.Price !== '') {
-                await sellNft(browser, page, metamask, nft.AssetUrl, nft.Price).then(() => {
-                    csv.writeSoldNftToCsvFile(nft);
+            await connectWallet(page, metamask);
 
-                    console.log(chalk.green(`Ордер размещен ${nft.Name}`));
-                }).catch((error) => {
-                    console.log(chalk.red(`Ошибка размещения ордера ${nft.Name}: ${error}`));
-                });
+
+            for (const nft of unsoldNft) {
+                if (nft.Price !== '') {
+                    await sellNft(browser, page, metamask, nft.AssetUrl, nft.Price).then(() => {
+                        csv.writeSoldNftToCsvFile(nft);
+
+                        console.log(chalk.green(`Ордер размещен ${nft.Name}`));
+                    }).catch((error) => {
+                        console.log(chalk.red(`Ошибка размещения ордера ${nft.Name}: ${error}`));
+                    });
+                }
             }
-        }
 
-        await browser.close();
-    }).catch((error) => {
-        console.log(chalk.red(`Ошибка запуска browser: ${error}`));
-    });
+            await browser.close();
+        }).catch((error) => {
+            console.log(chalk.red(`Ошибка запуска browser: ${error}`));
+        });
+    } else {
+        console.log(chalk.green(`Нет nft для продажи...`));
+    }
 }
 
 
