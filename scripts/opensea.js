@@ -38,8 +38,10 @@ async function sellNft(browser, page, metamask, network, nftUrl, orderPrice) {
 
 
 const uploadImage = async (page, file) => {
-    const elementHandle = await page.$("#media");
-    await elementHandle.uploadFile(file);
+    await page.waitForSelector('#media').then(async () => {
+        const elementHandle = await page.$("#media");
+        await elementHandle.uploadFile(file);
+    });
 }
 
 async function mintNft(page, metamask, nft, network) {
