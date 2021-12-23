@@ -40,8 +40,8 @@ const resultDir = './result';
         await dappeteer.launch(puppeteer, {
             executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
             metamaskVersion: 'v10.1.1',
-            // headless: false,
-            // timeout: 90000
+            headless: false,
+            timeout: 90000
         }).then(async (browser) => {
             const metamask = await setupMetamask(browser, secretPhase, network);
 
@@ -65,9 +65,11 @@ const resultDir = './result';
                 }
 
                 await tabs[1].bringToFront()
-                await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create?enable_supply=true`);
+                // await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create?enable_supply=true`);
+                await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create`);
 
-                await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
+                // await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
+                await mintNft(page, metamask, nft, network).then(async (mintedNft) => {
                     await csv.writeMintedNftToCsvFile(mintedNft);
                 }).catch((error) => {
                     console.log(chalk.red(`Ошибка minting'а ${nft.Name}: ${error}`));
