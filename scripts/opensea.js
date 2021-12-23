@@ -99,8 +99,10 @@ async function mintNft(page, metamask, nft, network) {
         await saveButton[0].click();
     }
 
-    const createButton = await page.$x("//button[contains(text(), 'Create')]");
-    await createButton[0].click();
+    await page.waitForXPath('//button[text()="Create"]').then( async () => {
+        const createButton = await page.$x("//button[contains(text(), 'Create')]");
+        await createButton[0].click();
+    });
 
     await page.waitForXPath('//h4[text()="Waiting for your wallet signature..."]').then(async () => {
         await metamask.sign();

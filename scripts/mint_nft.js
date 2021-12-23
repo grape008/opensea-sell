@@ -68,8 +68,8 @@ const resultDir = './result';
                 // await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create?enable_supply=true`);
                 await tabs[1].goto(`${openSeaUrl}/collection/${collectionSlug}/assets/create`);
 
-                // await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
-                await mintNft(page, metamask, nft, network).then(async (mintedNft) => {
+                await retry(mintNft, [page, metamask, nft, network]).then(async (mintedNft) => {
+                // await mintNft(page, metamask, nft, network).then(async (mintedNft) => {
                     await csv.writeMintedNftToCsvFile(mintedNft);
                 }).catch((error) => {
                     console.log(chalk.red(`Ошибка minting'а ${nft.Name}: ${error}`));
