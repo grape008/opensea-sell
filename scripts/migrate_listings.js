@@ -26,7 +26,6 @@ const {connectWallet} = require('./metamask');
     }
 
     const page = await browser.newPage();
-    await page.bringToFront()
     await page.setDefaultNavigationTimeout(0);
     await page.goto(openSeaUrl);
 
@@ -34,17 +33,18 @@ const {connectWallet} = require('./metamask');
 
     await connectWallet(page, metamask);
 
-    await page.waitForTimeout(1000)
-
     const tabs = await browser.pages();
-    await tabs[0].close();
+    await tabs[2].bringToFront();
 
     await page.goto(`${openSeaUrl}/account`);
     await page.waitForXPath('//span[(text()="Migrate listings")]')
     const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
     await migrateButton[0].click()
         .then(() => page.waitForTimeout(1000)
-            .then(() => metamask.sign()))
+            .then(() => metamask.sign()
+                .then(() => tabs[2].bringToFront())
+            )
+        )
 
 
     await page.waitForTimeout(1000)
@@ -57,6 +57,7 @@ const {connectWallet} = require('./metamask');
                 .click()
                 .then(() => page.waitForTimeout(1000)
                     .then(() => metamask.sign()
+                        .then(() => tabs[2].bringToFront())
                         .catch((error) => console.log(error.toString()))))
         }
 
