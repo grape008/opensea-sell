@@ -42,9 +42,7 @@ const {connectWallet} = require('./metamask');
     await migrateButton[0].click()
         .then(() => page.waitForTimeout(1000)
             .then(() => metamask.sign()
-                .then(() => tabs[2].bringToFront())
-            )
-        )
+                .then(() => tabs[2].bringToFront())))
 
 
     await page.waitForTimeout(1000)
@@ -52,8 +50,8 @@ const {connectWallet} = require('./metamask');
     await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
         const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]");
 
-        for (const btnOrder in confirmButton) {
-            await confirmButton[btnOrder]
+        for (const btn of confirmButton) {
+            await btn
                 .click()
                 .then(() => page.waitForTimeout(1000)
                     .then(() => metamask.sign()
@@ -63,5 +61,5 @@ const {connectWallet} = require('./metamask');
 
     })
 
-    // await browser.close();
+    await browser.close();
 })();
