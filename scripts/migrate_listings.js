@@ -56,7 +56,10 @@ const {connectWallet} = require('./metamask');
                 .then(() => page.waitForTimeout(1000)
                     .then(() => metamask.sign()
                         .then(() => tabs[2].bringToFront())
-                        .catch((error) => console.log(error.toString()))))
+                        .catch((error) => {
+                            console.log(error.toString())
+                            tabs[2].bringToFront()
+                        })))
         }
 
     })
