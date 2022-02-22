@@ -49,30 +49,28 @@ const {connectWallet} = require('./metamask');
 
 
     for (let i = 0; i < 999; i++) {
-        await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
-            const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
+        await page.waitForXPath('//button[(text()="Confirm")]')
 
-            for (let j = 0; j < 9; j++) {
-                await confirmButton[j]
-                    .click()
-                    .then(() => page.waitForTimeout(1000)
-                        .then(() => metamask.sign()
-                            .then(() => tabs[2].bringToFront())
-                            .catch((error) => {
-                                console.log(error.toString())
-                                tabs[2].bringToFront()
-                            })))
-            }
+        const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
 
-        })
-
+        for (let j = 0; j < 9; j++) {
+            await confirmButton[j]
+                .click()
+                .then(() => page.waitForTimeout(1000)
+                    .then(() => metamask.sign()
+                        .then(() => tabs[2].bringToFront())
+                        .catch((error) => {
+                            console.log(error.toString())
+                            tabs[2].bringToFront()
+                        })))
+        }
 
         await page.goto(`${openSeaUrl}/account`)
-            .then(async () => await page.waitForXPath('//span[(text()="Migrate listings")]')
-                .then(async () => {
-                    const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
-                    await migrateButton[0].click()
-                }))
+        await page.waitForXPath('//span[(text()="Migrate listings")]')
+            .then(async () => {
+                const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
+                await migrateButton[0].click()
+            })
 
     }
 
