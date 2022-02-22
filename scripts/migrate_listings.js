@@ -16,7 +16,7 @@ const {connectWallet} = require('./metamask');
     const browser = await dappeteer.launch(puppeteer, {
         executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
         metamaskVersion: 'v10.1.1',
-        timeout: 5000
+        timeout: 10000
     })
 
     const metamask = await dappeteer.setupMetamask(browser, {
@@ -28,8 +28,8 @@ const {connectWallet} = require('./metamask');
     }
 
     const page = await browser.newPage()
-    await page.setDefaultNavigationTimeout(5000)
-    await page.setDefaultTimeout(5000)
+    await page.setDefaultNavigationTimeout(0)
+    await page.setDefaultTimeout(10000)
     await page.goto(openSeaUrl)
 
     await page.waitForTimeout(1000)
