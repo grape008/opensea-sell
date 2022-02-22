@@ -45,7 +45,7 @@ const {connectWallet} = require('./metamask');
                 .then(() => tabs[2].bringToFront())))
 
 
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 999; i++) {
         await page.waitForTimeout(1000)
 
         await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
