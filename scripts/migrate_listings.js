@@ -45,24 +45,32 @@ const {connectWallet} = require('./metamask');
                 .then(() => tabs[2].bringToFront())))
 
 
-    await page.waitForTimeout(1000)
+    for (let i = 0; i < 9; i++) {
+        await page.waitForTimeout(1000)
 
-    await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
-        const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]");
+        await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
+            const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]");
 
-        for (const btn of confirmButton) {
-            await btn
-                .click()
-                .then(() => page.waitForTimeout(1000)
-                    .then(() => metamask.sign()
-                        .then(() => tabs[2].bringToFront())
-                        .catch((error) => {
-                            console.log(error.toString())
-                            tabs[2].bringToFront()
-                        })))
-        }
+            for (let j = 0; j < 9; j++) {
+                await confirmButton[j]
+                    .click()
+                    .then(() => page.waitForTimeout(1000)
+                        .then(() => metamask.sign()
+                            .then(() => tabs[2].bringToFront())
+                            .catch((error) => {
+                                console.log(error.toString())
+                                tabs[2].bringToFront()
+                            })))
+            }
 
-    })
+        })
+
+        await page.goto(`${openSeaUrl}/account`);
+        await page.waitForXPath('//span[(text()="Migrate listings")]')
+        const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
+        await migrateButton[0].click()
+    }
+
 
     await browser.close();
 })();
