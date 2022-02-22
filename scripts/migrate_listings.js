@@ -14,7 +14,9 @@ const {connectWallet} = require('./metamask');
     await closeReadLine();
 
     const browser = await dappeteer.launch(puppeteer, {
-        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome', metamaskVersion: 'v10.1.1'
+        executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+        metamaskVersion: 'v10.1.1',
+        timeout: 5000
     })
 
     const metamask = await dappeteer.setupMetamask(browser, {
@@ -25,9 +27,10 @@ const {connectWallet} = require('./metamask');
         await metamask.switchNetwork('rinkeby');
     }
 
-    const page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(0);
-    await page.goto(openSeaUrl);
+    const page = await browser.newPage()
+    await page.setDefaultNavigationTimeout(5000)
+    await page.setDefaultTimeout(5000)
+    await page.goto(openSeaUrl)
 
     await page.waitForTimeout(1000)
 
@@ -46,10 +49,8 @@ const {connectWallet} = require('./metamask');
 
 
     for (let i = 0; i < 999; i++) {
-        await page.waitForTimeout(1000)
-
         await page.waitForXPath('//button[(text()="Confirm")]').then(async () => {
-            const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]");
+            const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
 
             for (let j = 0; j < 9; j++) {
                 await confirmButton[j]
@@ -65,10 +66,14 @@ const {connectWallet} = require('./metamask');
 
         })
 
-        await page.goto(`${openSeaUrl}/account`);
-        await page.waitForXPath('//span[(text()="Migrate listings")]')
-        const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
-        await migrateButton[0].click()
+
+        await page.goto(`${openSeaUrl}/account`)
+            .then(async () => await page.waitForXPath('//span[(text()="Migrate listings")]')
+                .then(async () => {
+                    const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
+                    await migrateButton[0].click()
+                }))
+
     }
 
 
