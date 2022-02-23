@@ -48,7 +48,7 @@ const {connectWallet} = require('./metamask');
                 .then(() => metamask.sign()
                     .then(() => tabs[2].bringToFront())))
 
-
+        await page.waitForTimeout(1000);
         await page.waitForXPath('//button[(text()="Confirm")]')
 
         const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
