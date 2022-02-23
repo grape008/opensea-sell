@@ -30,7 +30,7 @@ const {connectWallet} = require('./metamask');
 
         const page = await browser.newPage()
         await page.setDefaultNavigationTimeout(0)
-        await page.setDefaultTimeout(10000)
+        // await page.setDefaultTimeout(10000)
         await page.goto(openSeaUrl)
 
         await page.waitForTimeout(1000)
