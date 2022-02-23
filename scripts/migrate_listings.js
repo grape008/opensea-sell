@@ -55,12 +55,16 @@ const {connectWallet} = require('./metamask');
             window.scrollBy(0, window.innerHeight);
         });
 
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(5000);
+
+        await page.waitForXPath("//button[contains(text(), 'Confirm')]")
 
         const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
             .catch((error) => {
                 console.log(error.toString())
             })
+
+        console.log(`Найдено записей: ${confirmButton.length}`)
 
         let idx = 99;
 
