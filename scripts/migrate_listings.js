@@ -49,11 +49,30 @@ const {connectWallet} = require('./metamask');
                     .then(() => tabs[2].bringToFront())))
 
         await page.waitForTimeout(1000);
-        await page.waitForXPath('//button[(text()="Confirm")]')
+
+        await page.evaluate(_ => {
+            window.scrollBy(0, window.innerHeight);
+        });
+
+        await page.waitForTimeout(1000);
 
         const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
+            .catch((error) => {
+                console.log(error.toString())
+            })
 
-        for (let j = 0; j < 99; j++) {
+        let idx = 99;
+
+        if (confirmButton.length < idx) {
+            idx = confirmButton.length
+        }
+
+        if (idx === 0) {
+            await browser.close();
+            break;
+        }
+
+        for (let j = 0; j < idx; j++) {
             await confirmButton[j]
                 .click()
                 .then(() => page.waitForTimeout(2000)
@@ -64,7 +83,6 @@ const {connectWallet} = require('./metamask');
                             tabs[2].bringToFront()
                         })))
         }
-
 
         await browser.close();
     }
