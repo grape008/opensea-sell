@@ -53,7 +53,7 @@ const {connectWallet} = require('./metamask');
 
         const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
 
-        for (let j = 0; j < 9; j++) {
+        for (let j = 0; j < 99; j++) {
             await confirmButton[j]
                 .click()
                 .then(() => page.waitForTimeout(1000)
