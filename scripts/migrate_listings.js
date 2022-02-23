@@ -52,7 +52,13 @@ const {connectWallet} = require('./metamask');
         await page.waitForTimeout(1000);
 
         await page.evaluate(_ => {
-            window.scrollBy(0, window.innerHeight);
+            window.scrollTo(0, document.body.scrollHeight)
+        });
+
+        await page.waitForTimeout(5000);
+
+        await page.evaluate(_ => {
+            window.scrollTo(0, document.body.scrollHeight)
         });
 
         await page.waitForTimeout(5000);
