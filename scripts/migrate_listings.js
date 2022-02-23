@@ -13,7 +13,7 @@ const {connectWallet} = require('./metamask');
 
     await closeReadLine();
 
-    for (let i = 0; i < 999; i++) {
+    for (let i = 0; i < 99; i++) {
         const browser = await dappeteer.launch(puppeteer, {
             executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
             metamaskVersion: 'v10.1.1'
@@ -49,50 +49,54 @@ const {connectWallet} = require('./metamask');
                         console.log(error.toString())
                     })))
 
-        await page.waitForTimeout(1000);
+        for (let z = 0; z < 99; z++) {
+            await page.goto(`${openSeaUrl}/account?tab=migrate_listings`);
 
-        await page.evaluate(_ => {
-            window.scrollTo(0, document.body.scrollHeight)
-        });
+            // await page.waitForTimeout(1000);
+            //
+            // await page.evaluate(_ => {
+            //     window.scrollTo(0, document.body.scrollHeight)
+            // });
+            //
+            // await page.waitForTimeout(5000);
+            //
+            // await page.evaluate(_ => {
+            //     window.scrollTo(0, document.body.scrollHeight)
+            // });
 
-        await page.waitForTimeout(5000);
+            await page.waitForTimeout(1000);
 
-        await page.evaluate(_ => {
-            window.scrollTo(0, document.body.scrollHeight)
-        });
+            await page.waitForXPath("//button[contains(text(), 'Confirm')]")
 
-        await page.waitForTimeout(5000);
+            const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
+                .catch((error) => {
+                    console.log(error.toString())
+                })
 
-        await page.waitForXPath("//button[contains(text(), 'Confirm')]")
+            console.log(`Найдено записей: ${confirmButton.length}`)
 
-        const confirmButton = await page.$x("//button[contains(text(), 'Confirm')]")
-            .catch((error) => {
-                console.log(error.toString())
-            })
+            let idx = 99;
 
-        console.log(`Найдено записей: ${confirmButton.length}`)
+            if (confirmButton.length < idx) {
+                idx = confirmButton.length
+            }
 
-        let idx = 99;
+            if (idx === 0) {
+                await browser.close();
+                break;
+            }
 
-        if (confirmButton.length < idx) {
-            idx = confirmButton.length
-        }
-
-        if (idx === 0) {
-            await browser.close();
-            break;
-        }
-
-        for (let j = 0; j < idx; j++) {
-            await confirmButton[j]
-                .click()
-                .then(() => page.waitForTimeout(2000)
-                    .then(() => metamask.sign()
-                        .then(() => tabs[2].bringToFront())
-                        .catch((error) => {
-                            console.log(error.toString())
-                            tabs[2].bringToFront()
-                        })))
+            for (let j = 0; j < idx; j++) {
+                await confirmButton[j]
+                    .click()
+                    .then(() => page.waitForTimeout(2000)
+                        .then(() => metamask.sign()
+                            .then(() => tabs[2].bringToFront())
+                            .catch((error) => {
+                                console.log(error.toString())
+                                tabs[2].bringToFront()
+                            })))
+            }
         }
 
         await browser.close();
