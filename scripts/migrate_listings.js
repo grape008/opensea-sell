@@ -16,8 +16,7 @@ const {connectWallet} = require('./metamask');
     for (let i = 0; i < 999; i++) {
         const browser = await dappeteer.launch(puppeteer, {
             executablePath: '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
-            metamaskVersion: 'v10.1.1',
-            timeout: 10000
+            metamaskVersion: 'v10.1.1'
         })
 
         const metamask = await dappeteer.setupMetamask(browser, {
@@ -44,9 +43,11 @@ const {connectWallet} = require('./metamask');
         await page.waitForXPath('//span[(text()="Migrate listings")]')
         const migrateButton = await page.$x("//span[contains(text(), 'Migrate listings')]")
         await migrateButton[0].click()
-            .then(() => page.waitForTimeout(1000)
+            .then(() => page.waitForTimeout(2500)
                 .then(() => metamask.sign()
-                    .then(() => tabs[2].bringToFront())))
+                    .then(() => tabs[2].bringToFront()).catch((error) => {
+                        console.log(error.toString())
+                    })))
 
         await page.waitForTimeout(1000);
 
