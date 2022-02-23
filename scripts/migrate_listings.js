@@ -52,12 +52,10 @@ const {connectWallet} = require('./metamask');
         for (let z = 0; z < 99; z++) {
             await page.goto(`${openSeaUrl}/account?tab=migrate_listings`);
 
-            // await page.waitForTimeout(1000);
-            //
-            // await page.evaluate(_ => {
-            //     window.scrollTo(0, document.body.scrollHeight)
-            // });
-            //
+            await page.evaluate(_ => {
+                window.scrollTo(0, document.body.scrollHeight)
+            });
+
             // await page.waitForTimeout(5000);
             //
             // await page.evaluate(_ => {
