@@ -56,7 +56,7 @@ const {connectWallet} = require('./metamask');
         for (let j = 0; j < 99; j++) {
             await confirmButton[j]
                 .click()
-                .then(() => page.waitForTimeout(1000)
+                .then(() => page.waitForTimeout(2000)
                     .then(() => metamask.sign()
                         .then(() => tabs[2].bringToFront())
                         .catch((error) => {
